@@ -7,5 +7,9 @@ export async function openStudio(input?: string): Promise<void> {
     return;
   }
   const result = await chrome.runtime.sendMessage({ type: 'OPEN_STUDIO', url });
-  if (!result?.ok) throw new Error(result?.error || 'Couldn’t open your workspace. Reload the extension and try again.');
+  if (!result?.ok)
+    throw new Error(
+      result?.error ||
+        'Couldn’t open your workspace. Reload the extension and try again.',
+    );
 }

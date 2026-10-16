@@ -130,15 +130,32 @@ function App() {
 
   useEffect(() => {
     const receive = (value: unknown) => {
-      if (!value || typeof value !== 'object' || !('url' in value) || typeof value.url !== 'string') return;
-      try { setIncoming(canonicalYouTubeUrl(value.url)); } catch { /* Ignore invalid stored links. */ }
+      if (
+        !value ||
+        typeof value !== 'object' ||
+        !('url' in value) ||
+        typeof value.url !== 'string'
+      )
+        return;
+      try {
+        setIncoming(canonicalYouTubeUrl(value.url));
+      } catch {
+        /* Ignore invalid stored links. */
+      }
     };
     const query = new URLSearchParams(window.location.search).get('url');
     if (query) receive({ url: query });
     if (typeof chrome === 'undefined' || !chrome.storage?.local) return;
-    void chrome.storage.local.get('pendingVideo').then(result => receive(result.pendingVideo)).catch(() => {});
-    const changed = (changes: Record<string, chrome.storage.StorageChange>, area: string) => {
-      if (area === 'local' && changes.pendingVideo?.newValue) receive(changes.pendingVideo.newValue);
+    void chrome.storage.local
+      .get('pendingVideo')
+      .then((result) => receive(result.pendingVideo))
+      .catch(() => {});
+    const changed = (
+      changes: Record<string, chrome.storage.StorageChange>,
+      area: string,
+    ) => {
+      if (area === 'local' && changes.pendingVideo?.newValue)
+        receive(changes.pendingVideo.newValue);
     };
     chrome.storage.onChanged.addListener(changed);
     return () => chrome.storage.onChanged.removeListener(changed);
@@ -166,7 +183,9 @@ function App() {
       setNotice('Save dialog opened. Chrome will show the download progress.');
     } catch (error) {
       setError(`Couldn’t save the MP4. ${(error as Error).message}`);
-    } finally { setBusyId(null); }
+    } finally {
+      setBusyId(null);
+    }
   }
 
   useEffect(() => {
@@ -563,15 +582,43 @@ function App() {
               </motion.div>
             )}
           </AnimatePresence>
-          {incoming && <div className="incoming-link" role="status">
-            <Youtube size={19}/><div><strong>A video from your toolbar is ready.</strong><p>{incoming}</p></div>
-            <button className="secondary" disabled={processing || starting || loading} onClick={() => void useIncoming()}>Use this link <ArrowRight size={15}/></button>
-          </div>}
-          {!connected && <section className="companion-guide" aria-label="Local companion setup">
-            <div><LockKeyhole size={19}/><h2>Connect your local companion</h2></div>
-            <p>In this extension’s project folder, run <code>npm start</code> and keep it running. PostReady reconnects automatically. First time? Run <code>npm install</code> and <code>npm run setup</code> first.</p>
-            <span>Processing continues when you close this tab. Keep the companion running until your MP4 is saved.</span>
-          </section>}
+          {incoming && (
+            <div className="incoming-link" role="status">
+              <Youtube size={19} />
+              <div>
+                <strong>A video from your toolbar is ready.</strong>
+                <p>{incoming}</p>
+              </div>
+              <button
+                className="secondary"
+                disabled={processing || starting || loading}
+                onClick={() => void useIncoming()}
+              >
+                Use this link <ArrowRight size={15} />
+              </button>
+            </div>
+          )}
+          {!connected && (
+            <section
+              className="companion-guide"
+              aria-label="Local companion setup"
+            >
+              <div>
+                <LockKeyhole size={19} />
+                <h2>Connect your local companion</h2>
+              </div>
+              <p>
+                In this extension’s project folder, run <code>npm start</code>{' '}
+                and keep it running. PostReady reconnects automatically. First
+                time? Run <code>npm install</code> and{' '}
+                <code>npm run setup</code> first.
+              </p>
+              <span>
+                Processing continues when you close this tab. Keep the companion
+                running until your MP4 is saved.
+              </span>
+            </section>
+          )}
           {connected && health && !health.ready && (
             <div className="alert warning">
               <TriangleAlert size={18} />

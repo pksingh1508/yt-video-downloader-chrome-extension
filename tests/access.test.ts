@@ -16,30 +16,55 @@ test('companion permits only the known extension and local development origins, 
   assert.ok(address && typeof address !== 'string');
   const url = `http://127.0.0.1:${address.port}/health`;
   try {
-    for (const origin of [`chrome-extension://${EXTENSION_ID}`, 'http://127.0.0.1:5174']) {
+    for (const origin of [
+      `chrome-extension://${EXTENSION_ID}`,
+      'http://127.0.0.1:5174',
+    ]) {
       const response = await fetch(url, { headers: { Origin: origin } });
       assert.equal(response.status, 200);
       assert.equal(response.headers.get('access-control-allow-origin'), origin);
-      const preflight = await fetch(url, { method: 'OPTIONS', headers: { Origin: origin, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' } });
+      const preflight = await fetch(url, {
+        method: 'OPTIONS',
+        headers: {
+          Origin: origin,
+          'Access-Control-Request-Method': 'POST',
+          'Access-Control-Request-Headers': 'content-type',
+        },
+      });
       assert.equal(preflight.status, 204);
-      assert.match(preflight.headers.get('access-control-allow-methods')!, /POST/);
+      assert.match(
+        preflight.headers.get('access-control-allow-methods')!,
+        /POST/,
+      );
     }
-    for (const origin of ['https://evil.test', 'null', 'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', `chrome-extension://${EXTENSION_ID}.evil.test`, 'http://127.0.0.1:9999']) {
+    for (const origin of [
+      'https://evil.test',
+      'null',
+      'chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      `chrome-extension://${EXTENSION_ID}.evil.test`,
+      'http://127.0.0.1:9999',
+    ]) {
       const response = await fetch(url, { headers: { Origin: origin } });
       assert.equal(response.status, 403);
       assert.equal(response.headers.get('access-control-allow-origin'), null);
     }
     assert.equal((await fetch(url)).status, 200);
-    const hostStatus = await new Promise<number | undefined>((resolve, reject) => {
-      const req = request(url, { headers: { Host: 'evil.test' } }, response => {
-        response.resume();
-        resolve(response.statusCode);
-      });
-      req.on('error', reject);
-      req.end();
-    });
+    const hostStatus = await new Promise<number | undefined>(
+      (resolve, reject) => {
+        const req = request(
+          url,
+          { headers: { Host: 'evil.test' } },
+          (response) => {
+            response.resume();
+            resolve(response.statusCode);
+          },
+        );
+        req.on('error', reject);
+        req.end();
+      },
+    );
     assert.equal(hostStatus, 403);
   } finally {
-    await new Promise<void>(resolve => server.close(() => resolve()));
+    await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });

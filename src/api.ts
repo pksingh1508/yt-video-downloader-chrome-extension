@@ -5,14 +5,22 @@ export async function api<T>(path: string, options?: RequestInit): Promise<T> {
   try {
     response = await fetch(`${API_BASE}${path}`, {
       ...options,
-      signal: options?.signal ?? AbortSignal.timeout(path === '/api/inspect' ? 130_000 : 15_000),
-      headers: { ...(options?.body ? { 'Content-Type': 'application/json' } : {}), ...options?.headers },
+      signal:
+        options?.signal ??
+        AbortSignal.timeout(path === '/api/inspect' ? 130_000 : 15_000),
+      headers: {
+        ...(options?.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options?.headers,
+      },
     });
   } catch {
-    throw new Error('Couldn’t reach the local companion. Run npm start in the extension project, then try again.');
+    throw new Error(
+      'Couldn’t reach the local companion. Run npm start in the extension project, then try again.',
+    );
   }
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error || 'The request failed. Please try again.');
+  if (!response.ok)
+    throw new Error(body.error || 'The request failed. Please try again.');
   return body as T;
 }
 

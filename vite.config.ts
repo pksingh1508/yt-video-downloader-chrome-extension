@@ -6,9 +6,19 @@ export default defineConfig({
   plugins: [react()],
   server: { host: '127.0.0.1', port: 5174, strictPort: true },
   build: {
+    target: 'chrome120',
     rollupOptions: {
-      input: { studio: 'index.html', popup: 'popup.html', background: 'src/background.ts' },
-      output: { entryFileNames: chunk => chunk.name === 'background' ? 'background.js' : 'assets/[name]-[hash].js' },
+      input: {
+        studio: 'index.html',
+        popup: 'popup.html',
+        background: 'src/background.ts',
+      },
+      output: {
+        entryFileNames: (chunk) =>
+          chunk.name === 'background'
+            ? 'background.js'
+            : 'assets/[name]-[hash].js',
+      },
     },
   },
 });
