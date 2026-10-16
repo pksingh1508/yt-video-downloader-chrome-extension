@@ -1,5 +1,19 @@
-import { createRoot } from 'react-dom/client';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { MotionConfig } from 'framer-motion';
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
+import '@fontsource-variable/manrope';
+import './styles.css';
 
-createRoot(document.getElementById('root')!).render(
-  <main><h1>PostReady for Chrome</h1><p>Your YouTube to X workspace is being built. Start the local companion with npm start.</p></main>,
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <MotionConfig
+      reducedMotion="user"
+      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <App />
+    </MotionConfig>
+  </React.StrictMode>,
 );
