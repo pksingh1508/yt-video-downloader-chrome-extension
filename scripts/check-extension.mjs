@@ -4,6 +4,11 @@ import assert from 'node:assert/strict';
 
 const manifest = JSON.parse(await readFile('dist/manifest.json', 'utf8'));
 assert.equal(manifest.manifest_version, 3);
+assert.equal(
+  manifest.background,
+  undefined,
+  'The popup must not have a tab-launching background worker.',
+);
 const id = [
   ...createHash('sha256')
     .update(Buffer.from(manifest.key, 'base64'))
@@ -16,11 +21,7 @@ assert.ok(
   (await readFile('src/config.ts', 'utf8')).includes(`'${id}'`),
   'Companion origin must match the extension public key.',
 );
-for (const file of [
-  'index.html',
-  manifest.action.default_popup,
-  manifest.background.service_worker,
-]) {
+for (const file of ['index.html', manifest.action.default_popup]) {
   await access(`dist/${file}`);
 }
 for (const file of Object.values(manifest.icons)) await access(`dist/${file}`);

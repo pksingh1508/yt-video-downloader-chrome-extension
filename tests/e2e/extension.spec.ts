@@ -146,3 +146,53 @@ test('popup explains an offline companion and reconnects without reopening', asy
   await expect(popup.getByText('Local companion connected')).toBeVisible();
   await popup.close();
 });
+
+test('failed video loads can be retried and exports can be cancelled within the popup', async () => {
+  const popup = await context.newPage();
+  await popup.goto(`${extension}/popup.html`);
+  await expect(popup.getByText('Local companion connected')).toBeVisible();
+  await popup.getByRole('button', { name: 'New video', exact: true }).click();
+  await popup.route(
+    'http://127.0.0.1:3002/api/inspect',
+    (route) =>
+      route.fulfill({
+        status: 422,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'This video is unavailable.' }),
+      }),
+    { times: 1 },
+  );
+  await popup
+    .getByRole('textbox', { name: 'YouTube video link' })
+    .fill('https://youtu.be/jNQXAC9IVRw');
+  const tabCount = context.pages().length;
+  await popup.getByRole('button', { name: 'Choose clip & format' }).click();
+  await expect(popup.getByRole('alert')).toHaveText(
+    'This video is unavailable.',
+  );
+  await popup.getByRole('button', { name: 'Choose clip & format' }).click();
+  await expect(
+    popup.getByRole('heading', { name: 'Extension test fixture' }),
+  ).toBeVisible();
+  await popup.getByRole('textbox', { name: 'Clip end time' }).fill('0:02');
+  await popup
+    .getByRole('button', { name: 'Prepare for X', exact: true })
+    .click();
+  await popup
+    .getByRole('region', { name: 'Export status' })
+    .getByRole('button', { name: 'Cancel', exact: true })
+    .click();
+  await expect(
+    popup
+      .getByRole('region', { name: 'Export status' })
+      .getByText('Export cancelled.', { exact: true })
+      .first(),
+  ).toBeVisible();
+  await popup
+    .getByRole('button', { name: 'My downloads', exact: true })
+    .click();
+  await expect(popup.locator('.history-title span')).toContainText('cancelled');
+  expect(context.pages()).toHaveLength(tabCount);
+  expect(errors).toEqual([]);
+  await popup.close();
+});
