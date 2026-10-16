@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "PostReady — YouTube to X",
+  "version": "0.1.0",
+  "description": "Turn a YouTube link into a verified MP4 for X, with the PostReady local companion.",
+  "minimum_chrome_version": "120",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA92U5S6Sm/dosV+LRhDIgqvjnhKynFSjgRo8NkiamEYR78L41qTiP1O0QZX+MMZpx8e0N/8PVlrcYq2xI71VAnSSypVX8rWvpo68YgZ5bCAuITJswT/zJI0m4Xqt0xyPhBdT7gzDejreJ9d67bFeGHVFk54Ov16I1BM7Q/U+jNTSK09joSJGqGgeEdrB0Lu5mFqD5sMoDXZYSoekc6DVpL9/cWri+94Ch9w3GIsxRBbODAX4oMs00t3LvsuXWPeafdxFsVdpqogeGUj5BmTAO9UqetG9sxlrFEePjRtMCq3DC5BOG6br117YCR67xdakQHd3VCGRZ4mBskSo7cFZWkQIDAQAB",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "downloads"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*"
+  ],
+  "action": {
+    "default_title": "PostReady",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://127.0.0.1:3002; img-src 'self' https://i.ytimg.com data:; media-src 'self' http://127.0.0.1:3002; style-src 'self' 'unsafe-inline'; font-src 'self'"
+  }
+}
